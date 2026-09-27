@@ -1,0 +1,17 @@
+{
+  "name": "blokkenscanner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Controleer Scratch-code van papieren of 3D-geprinte blokken met een foto (TechniScience / STEAM).",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "test:browser": "node tests/browser/roundtrip.mjs && node tests/browser/ai-mock.mjs",
+    "build:font": "node tools/build-font.mjs",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "opentype.js": "^2.0.0",
+    "playwright-core": "1.63.0"
+  }
+}

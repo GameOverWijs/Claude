@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blokkenscanner</title>
+<meta name="description" content="Maak een foto van Scratch-blokken van papier of uit de 3D-printer en kijk of de code werkt. Met alle blokken als SVG om te printen.">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M4 7a3 3 0 0 1 3-3h6l2 2h5l2-2h11a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H22l-2 2h-5l-2-2H7a3 3 0 0 1-3-3z" fill="#FFBF00"/>
+        <path d="M4 20a3 3 0 0 1 3-3h6l2 2h5l2-2h11a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H22l-2 2h-5l-2-2H7a3 3 0 0 1-3-3z" fill="#4C97FF"/>
+        <rect x="7" y="20" width="9" height="9" rx="1" fill="#fff"/><path d="M8.5 21.5h2v2h-2zM12.5 21.5h2v2h-2zM10.5 23.5h2v2h-2zM8.5 25.5h2v2h-2zM12.5 25.5h2v2h-2z" fill="#1D2433"/>
+        <path d="M6 33h28" stroke="#EAF4EF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 3"/>
+      </svg>
+      <div>
+        <h1>Blokkenscanner</h1>
+        <p>TechniScience &middot; Scratch zonder scherm</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Onderdelen">
+      <button class="tab" role="tab" id="tab-btn-scan" aria-controls="tab-scan" aria-selected="true">Scannen</button>
+      <button class="tab" role="tab" id="tab-btn-blocks" aria-controls="tab-blocks" aria-selected="false">Blokken &amp; downloads</button>
+      <button class="tab" role="tab" id="tab-btn-tasks" aria-controls="tab-tasks" aria-selected="false">Opdrachten</button>
+      <button class="tab" role="tab" id="tab-btn-help" aria-controls="tab-help" aria-selected="false">Uitleg</button>
+      <button class="tab" role="tab" id="tab-btn-settings" aria-controls="tab-settings" aria-selected="false">Instellingen</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================================================================ SCANNEN -->
+  <section class="panel" id="tab-scan" role="tabpanel" aria-labelledby="tab-btn-scan">
+    <div class="scan-grid">
+      <div class="col">
+        <div class="card photo-card">
+          <div class="card-head">
+            <div>
+              <div class="step">Stap 1</div>
+              <h2>Foto van je code</h2>
+            </div>
+            <div class="seg" role="group" aria-label="Manier van herkennen">
+              <button type="button" id="mode-markers" aria-pressed="true">Codevierkantjes</button>
+              <button type="button" id="mode-ai" aria-pressed="false">Vrij getekend (AI)</button>
+            </div>
+          </div>
+          <p class="small muted" id="mode-help">Elk blok heeft een zwart-wit codevierkantje. Werkt zonder internet; de foto blijft op dit apparaat.</p>
+          <div class="btn-row">
+            <label class="btn primary">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 3 7.2 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10m0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6"/></svg>
+              Foto maken
+              <input type="file" id="file-camera" accept="image/*" capture="environment">
+            </label>
+            <label class="btn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2m0 12 4-5 3 4 2-3 5 4V6H5z"/></svg>
+              Foto kiezen
+              <input type="file" id="file-pick" accept="image/*">
+            </label>
+            <button type="button" class="btn" id="btn-live">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 6h11a2 2 0 0 1 2 2v1.5l4-2.5v10l-4-2.5V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2"/></svg>
+              Live camera
+            </button>
+            <select id="sample-select" aria-label="Voorbeeldfoto">
+              <option value="">Voorbeeld proberen&hellip;</option>
+            </select>
+          </div>
+          <div class="photo-wrap" id="photo-wrap">
+            <div class="photo-empty" id="photo-empty">
+              <strong>Nog geen foto</strong>
+              <span>Maak een foto recht van boven, met alle blokken en codevierkantjes in beeld. Je kunt een foto ook hierheen slepen of plakken.</span>
+            </div>
+            <video id="live-video" playsinline muted hidden></video>
+            <canvas id="photo-canvas" hidden></canvas>
+            <canvas class="overlay" id="photo-overlay" hidden></canvas>
+          </div>
+          <div class="btn-row" id="live-controls" hidden>
+            <button type="button" class="btn primary" id="btn-snap">Deze foto gebruiken</button>
+            <button type="button" class="btn ghost" id="btn-live-stop">Camera uit</button>
+            <span class="small muted" id="live-count"></span>
+          </div>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="card code-card">
+          <div class="card-head">
+            <div>
+              <div class="step">Stap 2</div>
+              <h2>Dit lees ik</h2>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn small" id="btn-dl-script" disabled>Code als SVG</button>
+              <button type="button" class="btn small" id="btn-dl-sb3" disabled>Openen in Scratch (.sb3)</button>
+            </div>
+          </div>
+          <div class="code-view" id="code-view"><p class="code-empty">Hier komt de code die de scanner herkent, zoals hij er in Scratch uitziet. Vergelijk hem met je blokken.</p></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="verdict" id="verdict" data-level="leeg" role="status" aria-live="polite">
+          <div class="badge" id="verdict-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 7h2v6h-2zm0 8h2v2h-2zm1-13a10 10 0 1 0 0 20 10 10 0 0 0 0-20"/></svg></div>
+          <div>
+            <h2 id="verdict-title">Nog niets gecontroleerd</h2>
+            <p id="verdict-text" class="muted">Maak een foto of kies een voorbeeld.</p>
+          </div>
+        </div>
+
+        <div class="card" id="issues-card" hidden>
+          <h2>Wat de scanner opvalt</h2>
+          <ul class="issues" id="issues"></ul>
+        </div>
+
+        <div class="card stage-card">
+          <div class="card-head">
+            <div>
+              <div class="step">Stap 3</div>
+              <h2>Probeer het uit</h2>
+            </div>
+            <label class="field" style="min-width: 12rem">
+              <span class="small">Opdracht</span>
+              <select id="task-select"></select>
+            </label>
+          </div>
+          <p class="small muted" id="task-goal"></p>
+          <div class="stage-frame"><canvas id="stage" width="480" height="360" aria-label="Speelveld met Robo"></canvas></div>
+          <div class="btn-row">
+            <button type="button" class="btn go" id="btn-flag" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h2v18H5zm3 1c3-1.6 5 1.6 8 0 1.3-.7 2.4-.8 3.5-.4v9c-1.1-.4-2.2-.3-3.5.4-3 1.6-5-1.6-8 0z"/></svg>
+              Groene vlag
+            </button>
+            <button type="button" class="btn stop" id="btn-stop" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/></svg>
+              Stop
+            </button>
+            <label class="check small"><input type="checkbox" id="slow"> Langzaam (volg de blokken)</label>
+            <label class="check small"><input type="checkbox" id="grid" checked> Raster</label>
+          </div>
+          <div class="keys" id="keys" hidden>
+            <button type="button" class="btn small" data-key="left arrow" aria-label="Pijltje links">&larr;</button>
+            <button type="button" class="btn small" data-key="up arrow" aria-label="Pijltje omhoog">&uarr;</button>
+            <button type="button" class="btn small" data-key="down arrow" aria-label="Pijltje omlaag">&darr;</button>
+            <button type="button" class="btn small" data-key="right arrow" aria-label="Pijltje rechts">&rarr;</button>
+            <button type="button" class="btn small" data-key="space">spatiebalk</button>
+          </div>
+          <div class="outcome" id="outcome" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ BLOKKEN -->
+  <section class="panel" id="tab-blocks" role="tabpanel" aria-labelledby="tab-btn-blocks" hidden>
+    <div class="card">
+      <h2>Blokken printen of 3D-printen</h2>
+      <p class="muted">Alle blokken zijn op ware grootte in millimeters. Print op 100 % (niet &ldquo;aanpassen aan pagina&rdquo;). Het codevierkantje links op elk blok vertelt de scanner welk blok het is: houd het plat, zwart-wit en onbeschadigd.</p>
+      <div class="toolbar">
+        <label class="field"><span>Welke blokken</span><select id="set-select"></select></label>
+        <label class="field"><span>Stijl</span>
+          <select id="style-select">
+            <option value="kleur">Kleur, zoals Scratch</option>
+            <option value="kleurplaat">Kleurplaat (zwart-wit)</option>
+            <option value="3d-vorm">3D-vorm (omtrek, voor Tinkercad)</option>
+            <option value="3d-tekst">3D-opdruk (tekst en wit deel codevierkantje)</option>
+            <option value="3d-marker">3D-codevierkant (zwart deel)</option>
+          </select>
+        </label>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-sheets">A4-printvellen (ZIP)</button>
+          <button type="button" class="btn" id="btn-zip">Losse blokken (ZIP)</button>
+          <button type="button" class="btn" id="btn-zip-3d">3D-pakket, alle lagen (ZIP)</button>
+          <button type="button" class="btn" id="btn-stickers">Stickervel codevierkantjes (ZIP)</button>
+        </div>
+      </div>
+      <p class="small muted" id="set-info"></p>
+    </div>
+    <div id="piece-list" class="panel"></div>
+  </section>
+
+  <!-- ================================================================ OPDRACHTEN -->
+  <section class="panel" id="tab-tasks" role="tabpanel" aria-labelledby="tab-btn-tasks" hidden>
+    <div class="card">
+      <h2>Opdrachten</h2>
+      <p class="muted">Kies bij Scannen een opdracht. De scanner voert de code dan in een flits uit en kijkt of Robo doet wat er gevraagd wordt: tekent hij echt een vierkant, zegt hij echt &ldquo;Hallo!&rdquo;? Een voorbeeldoplossing staat onder elke opdracht, voor de leerkracht.</p>
+    </div>
+    <div class="task-grid" id="task-list"></div>
+  </section>
+
+  <!-- ================================================================ UITLEG -->
+  <section class="panel" id="tab-help" role="tabpanel" aria-labelledby="tab-btn-help" hidden>
+    <div class="card prose">
+      <h2>Zo werkt de Blokkenscanner</h2>
+      <ol>
+        <li><strong>Print de blokken</strong> bij &ldquo;Blokken &amp; downloads&rdquo;: in kleur, als kleurplaat of als 3D-model. Knip ze uit langs de rand.</li>
+        <li><strong>Bouw een script</strong> op tafel: bovenaan een geel startblok, daaronder de andere blokken, recht onder elkaar.</li>
+        <li><strong>Maak een foto</strong> recht van boven. De scanner zoekt de codevierkantjes en leest welk blok waar ligt.</li>
+        <li><strong>Lees het oordeel</strong>: werkt de code, en zo niet, wat moet er anders? Klik op de groene vlag om Robo de code te zien uitvoeren.</li>
+      </ol>
+
+      <h2>C-blokken: herhaal en als</h2>
+      <p>Op papier kan een C-blok niet uitrekken. Daarom bestaat het uit losse stukken, net als haakjes:</p>
+      <ul>
+        <li>het bovenstuk (bijvoorbeeld <em>herhaal (4)</em> of <em>als &lt;&gt; dan</em>),</li>
+        <li>de blokken die erin horen, een stukje naar rechts (inspringen),</li>
+        <li>een <em>einde</em>-stuk eronder. Bij <em>als ... dan ... anders</em> komt er een <em>anders</em>-stuk tussen.</li>
+      </ul>
+      <p>Vergeet een leerling het einde-stuk, dan meldt de scanner dat als fout en gebruikt het inspringen om te raden waar het einde had moeten liggen.</p>
+
+      <h2>Getallen, tekst en voorwaarden</h2>
+      <p>Elk blok toont een standaardwaarde, zoals <em>neem (10) stappen</em>. Wil je iets anders, leg dan een getaltegel precies op het vakje. Een voorwaarde (zeshoekig, lichtblauw) leg je in het zeshoekige vakje van <em>als</em>, <em>herhaal tot</em> of <em>wacht tot</em>.</p>
+
+      <h2>Tips voor een goede foto</h2>
+      <ul>
+        <li>Recht van boven, alle codevierkantjes helemaal in beeld.</li>
+        <li>Genoeg licht, geen harde schaduw over de vierkantjes.</li>
+        <li>Geen glanzende laminaat: dat weerkaatst en maakt vierkantjes onleesbaar. Mat lamineren of karton werkt beter.</li>
+        <li>Grote scripts? Een telefoonfoto van 12 megapixel leest vierkantjes tot ongeveer een A3-vel groot.</li>
+      </ul>
+
+      <h2>Zelf getekende blokken</h2>
+      <p>Twee manieren:</p>
+      <ul>
+        <li><strong>Met stickers</strong>: print het stickervel met codevierkantjes, knip het vierkantje van het juiste blok uit en plak het links op het getekende blok. Dan werkt alles offline.</li>
+        <li><strong>Met AI</strong>: zet de scanner op &ldquo;Vrij getekend&rdquo;. De foto gaat dan naar Claude (van Anthropic), dat de tekening leest. Daarvoor is een API-sleutel van de school nodig (zie Instellingen). De controle zelf doet de scanner daarna weer op dit apparaat, met dezelfde regels.</li>
+      </ul>
+      <p><strong>Kosten</strong> (schatting, Anthropic rekent in dollars per token): Claude Opus 5 ongeveer $0,05 tot $0,11 per foto, Claude Sonnet 5 ongeveer $0,02 tot $0,05 en Claude Haiku 4.5 ongeveer $0,01. Een klas van 30 leerlingen die elk 5 foto's maakt kost dus ongeveer $7 tot $17 met Opus 5, of $3 tot $7 met Sonnet 5. Na elke foto toont de scanner het echte aantal tokens en de kosten.</p>
+      <div class="note warn">
+        <strong>Privacy (AVG):</strong> in de AI-modus gaat de foto naar de servers van Anthropic in de Verenigde Staten. Overleg dit met de privacyfunctionaris van je school, zet geen gezichten of namen in beeld en gebruik bij twijfel de codevierkantjes. Die modus stuurt niets over het internet.
+      </div>
+
+      <h2>3D-printen</h2>
+      <ul>
+        <li><strong>Eén kleur printer</strong>: print de <em>3D-vorm</em> (3 &agrave; 4 mm dik) en plak de kleurversie er als sticker op. Dit werkt het betrouwbaarst.</li>
+        <li><strong>Meerdere kleuren</strong>: importeer <em>3D-vorm</em>, <em>3D-opdruk</em> en <em>3D-codevierkant</em> in Tinkercad. Ze zijn precies even groot en passen op elkaar. Maak de opdruk 0,6 mm hoog in wit en het codevierkant 0,6 mm in zwart.</li>
+        <li>Het codevierkantje moet zwart op wit zijn. Een gekleurd blok (geel, oranje) zonder witte opdruk kan de scanner niet lezen.</li>
+      </ul>
+
+      <h2>Wat controleert de scanner?</h2>
+      <div class="table-wrap">
+        <table class="simple">
+          <thead><tr><th>Soort</th><th>Voorbeelden</th></tr></thead>
+          <tbody>
+            <tr><td>Fout</td><td>geen startblok, einde-stuk vergeten of te veel, anders-stuk zonder als, tekst waar een getal hoort, komma in plaats van punt (0,5), blokken na <em>herhaal</em> zonder getal</td></tr>
+            <tr><td>Let op</td><td>lege lus, <em>als</em> zonder voorwaarde, getal groter dan het speelveld, Robo loopt tegen de rand, er gebeurt niets zichtbaars</td></tr>
+            <tr><td>Tip</td><td>dezelfde blokken drie keer achter elkaar (gebruik herhaal), meerdere groene vlaggen tegelijk, niet netjes ingesprongen</td></tr>
+            <tr><td>Opdracht</td><td>de scanner voert de code uit en controleert het resultaat: is de vorm dicht, zijn alle zijden even lang, draait Robo de goede hoek</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Openen in Scratch</h2>
+      <p>Met &ldquo;Openen in Scratch (.sb3)&rdquo; bewaar je de herkende code als Scratch-project. Open het op <a href="https://scratch.mit.edu" target="_blank" rel="noopener">scratch.mit.edu</a> via Bestand &gt; Uploaden van je computer, en ga verder op het scherm.</p>
+
+      <p class="small muted">Scratch is een project van de Scratch Foundation, in samenwerking met de MIT Media Lab Lifelong Kindergarten Group. De Blokkenscanner is daar niet aan verbonden. De bloknamen volgen de Nederlandse Scratch-vertaling zodat leerlingen dezelfde woorden zien.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================ INSTELLINGEN -->
+  <section class="panel" id="tab-settings" role="tabpanel" aria-labelledby="tab-btn-settings" hidden>
+    <div class="card prose">
+      <h2>AI-modus voor vrij getekende blokken</h2>
+      <p class="muted">Alleen nodig als leerlingen blokken helemaal zelf tekenen, zonder codevierkantjes. De foto gaat dan naar Claude van Anthropic. Kosten per foto staan bij Uitleg. Een account en sleutel maak je aan op <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
+      <label class="field"><span>API-sleutel</span><input type="password" id="api-key" autocomplete="off" placeholder="sk-ant-..."></label>
+      <label class="check"><input type="checkbox" id="api-remember"> <span>Onthoud de sleutel op dit apparaat. Doe dit niet op een gedeelde leerlingcomputer.</span></label>
+      <label class="field"><span>Model</span><select id="api-model"></select></label>
+      <label class="check"><input type="checkbox" id="api-consent"> <span>De school heeft toestemming gegeven om foto's van getekende blokken naar Anthropic te sturen. Er staan geen gezichten of namen op de foto's.</span></label>
+      <p class="small muted" id="api-state"></p>
+
+      <h2>Herkennen</h2>
+      <label class="field"><span>Hoeveel verkeerd gelezen vakjes mag de scanner verbeteren?</span>
+        <select id="max-errors">
+          <option value="1">1 (strenger, minder kans op een verkeerd blok)</option>
+          <option value="2" selected>2 (aanbevolen)</option>
+          <option value="3">3 (soepeler, voor wazige foto's)</option>
+        </select>
+      </label>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  Blokkenscanner &middot; codevierkantjes via js-aruco2 (MIT) &middot; lettertype Nunito (SIL OFL 1.1) &middot; werkt ook zonder internet als je deze map downloadt en <code>index.html</code> opent.
+</footer>
+
+<script src="vendor/js-aruco2/cv.js"></script>
+<script src="vendor/js-aruco2/aruco.js"></script>
+<script src="js/markers.js"></script>
+<script src="js/font-data.js"></script>
+<script src="js/font.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/program.js"></script>
+<script src="js/render.js"></script>
+<script src="js/zip.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/recognize.js"></script>
+<script src="js/structure.js"></script>
+<script src="js/validate.js"></script>
+<script src="js/interpreter.js"></script>
+<script src="js/assignments.js"></script>
+<script src="js/stage.js"></script>
+<script src="js/samples.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/sb3.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
